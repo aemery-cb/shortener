@@ -46,21 +46,19 @@ func (store *URLStore) apiHandler(w http.ResponseWriter, req *http.Request) {
 
 	(*store)[key] = urlReq.Url
 
-	w.Header().Add("Content-Type", "text/plain")
+	w.Header().Add("Content-Type", "application/json")
 
-	final := fmt.Sprintf("https://%s/%s\n", req.Host, key)
-	fmt.Fprintf(w, "%s\n", final)
+	final := fmt.Sprintf("http://%s/%s", req.Host, key)
+
+	response := map[string]string{"url": final}
+	json.NewEncoder(w).Encode(response)
 
 }
 
 func (store *URLStore) indexHandler(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method != "GET" {
-		return
-	}
-
-	if req.URL.Path == "" {
-		fmt.Println("index probably")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -69,16 +67,24 @@ func (store *URLStore) indexHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.Error(w, "Not Found", http.StatusNotFound)
 }
 
 func main() {
+	fileServer := http.FileServer(http.Dir("./public"))
+
+	mux := http.NewServeMux()
 
 	store := URLStore{}
-	http.HandleFunc("/api/shorten", store.apiHandler)
-	http.HandleFunc("/", store.indexHandler)
+	mux.HandleFunc("/api/shorten", store.apiHandler)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := store[r.URL.Path[1:]]; ok {
+			store.indexHandler(w, r)
+		} else {
+			fileServer.ServeHTTP(w, r)
+		}
+	})
 
-	if err := http.ListenAndServe(":8090", nil); err != nil {
+	if err := http.ListenAndServe(":8090", mux); err != nil {
 		log.Panic(err)
 	}
 }
