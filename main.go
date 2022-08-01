@@ -1,14 +1,14 @@
 package main
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/fs"
 	"log"
 	"math/rand"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 type NewURLRequester struct {
@@ -56,6 +56,7 @@ func (store *URLStore) apiHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	key := store.GenerateURLKey()
+
 	(*store)[key] = urlReq.Url
 
 	w.Header().Add("Content-Type", "application/json")
@@ -82,12 +83,22 @@ func (store *URLStore) indexHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	logger, err := zap.NewProduction()
 
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sugar := logger.Sugar()
+
+	sugar.Debug("Reading built-in FS")
 	fsys, err := fs.Sub(res, "public")
 	if err != nil {
 		panic(err)
 	}
+
 	fileServer := http.FileServer(http.FS(fsys))
+	sugar.Debug("Reading built-in FS")
 	mux := http.NewServeMux()
 
 	store := URLStore{}
@@ -100,7 +111,9 @@ func main() {
 		}
 	})
 
-	if err := http.ListenAndServe(":8090", mux); err != nil {
+	middleware := LoggingMiddleware(sugar)
+
+	if err := http.ListenAndServe(":8090", middleware(mux)); err != nil {
 		log.Panic(err)
 	}
 }
