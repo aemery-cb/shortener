@@ -16,7 +16,7 @@ type NewURLRequester struct {
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
+const HOST_URL = "https://yock.to"
 type URLStore map[string]string
 
 func (store *URLStore) GenerateURLKey() string {
@@ -61,7 +61,7 @@ func (store *URLStore) apiHandler(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Add("Content-Type", "application/json")
 
-	final := fmt.Sprintf("http://%s/%s", req.Host, key)
+    final := fmt.Sprintf("%s/%s", HOST_URL, key)
 
 	response := map[string]string{"url": final}
 	json.NewEncoder(w).Encode(response)
