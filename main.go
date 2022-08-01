@@ -5,7 +5,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
+	"math/rand"
 	"net/http"
 )
 
@@ -13,17 +15,23 @@ type NewURLRequester struct {
 	Url string
 }
 
-func GenerateURLKey(url string) string {
-	h := sha1.New()
-	h.Write([]byte(url))
-	bs := h.Sum(nil)
-
-	final := hex.EncodeToString(bs)
-	return final[:6]
-
-}
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 type URLStore map[string]string
+
+func (store *URLStore) GenerateURLKey() string {
+	b := make([]byte, 6)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	key := string(b)
+
+	if _, ok := (*store)[key]; ok {
+		//collision
+		return store.GenerateURLKey()
+	}
+	return key
+}
 
 func (store *URLStore) apiHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
@@ -42,8 +50,12 @@ func (store *URLStore) apiHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	key := GenerateURLKey(urlReq.Url)
+	if len(urlReq.Url) > 64000 {
+		http.Error(w, "Error: URL TOO LONG", http.StatusBadRequest)
+		return
+	}
 
+	key := store.GenerateURLKey()
 	(*store)[key] = urlReq.Url
 
 	w.Header().Add("Content-Type", "application/json")
@@ -70,8 +82,12 @@ func (store *URLStore) indexHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	fileServer := http.FileServer(http.Dir("./public"))
 
+	fsys, err := fs.Sub(res, "public")
+	if err != nil {
+		panic(err)
+	}
+	fileServer := http.FileServer(http.FS(fsys))
 	mux := http.NewServeMux()
 
 	store := URLStore{}
