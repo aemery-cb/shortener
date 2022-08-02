@@ -1,0 +1,3 @@
+DB_URL: couchbase://localhost
+DB_USER: Administrator
+DB_PASS: password
