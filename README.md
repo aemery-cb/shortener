@@ -2,12 +2,13 @@
 
 A thrown together all in one URL shortener.
 
-## Roadmap
+## Todo
 - [ ] Streamline build.
 - [ ] Use a DB
 - [ ] CSV upload options
 - [ ] plain text sharing
 - [ ] URL Validation (server + clientside)
+- [ ] Change the api post request to a get request?
 
 ## Done
 - [x] Embed the UI for an AIO binary

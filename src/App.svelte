@@ -1,5 +1,15 @@
 <script>
 	let newUrl = "";
+    function validURL(str) {
+  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+  return !!pattern.test(str);
+}
+
 	async function submit (e) {
 
 		const formData = new FormData(e.target);
@@ -9,8 +19,12 @@
 			const [key, value] = field;
 			data[key] = value;
 		}
-		console.log(data);
-		newUrl = await shortenURL(data.url);
+
+        if (validURL(data.url)) {
+		    newUrl = await shortenURL(data.url);
+        } else {
+            newUrl = "please enter a valid url"
+        }
 	}
 
 	const shortenURL = async (url) => {
@@ -27,6 +41,8 @@
 </script>
 
 <main>
+<h1>Yock</h1>
+<p>Enter a url to shorten below</p>
 	<form on:submit|preventDefault={submit}>
 		<input type="text" id="url" name="url" />
 		<button type="submit"> Shorten! </button>

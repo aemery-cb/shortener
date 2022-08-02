@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 
 	"go.uber.org/zap"
 )
@@ -54,6 +55,11 @@ func (store *URLStore) apiHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Error: URL TOO LONG", http.StatusBadRequest)
 		return
 	}
+    
+    if _, err := url.ParseRequestURI(urlReq.Url); err != nil {
+		http.Error(w, "Error: Invalid URL", http.StatusBadRequest)
+        return
+    }
 
 	key := store.GenerateURLKey()
 
