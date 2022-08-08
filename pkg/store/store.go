@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"log"
@@ -17,9 +17,10 @@ type Shortened struct {
 	Content    string `json:"content"`
 	Type       string `json:"type"`
 	HitCounter int    `json:"hitCounter"`
+	Owner      string
 }
 
-func NewStore(cluster *gocb.Cluster) *Store {
+func New(cluster *gocb.Cluster) *Store {
 	bucketName := "shortener"
 
 	bucket := cluster.Bucket(bucketName)
@@ -32,13 +33,14 @@ func NewStore(cluster *gocb.Cluster) *Store {
 	return &Store{cluster: cluster, bucket: bucket}
 }
 
-func (store *Store) StoreUrl(key string, url string) error {
+func (store *Store) StoreUrl(key, url, userId string) error {
 	col := store.bucket.DefaultCollection()
 
 	_, err := col.Upsert("u:"+key, Shortened{
 		Key:     key,
 		Content: url,
 		Type:    "url",
+		Owner:   userId,
 	}, nil)
 
 	if err != nil {
@@ -46,6 +48,30 @@ func (store *Store) StoreUrl(key string, url string) error {
 	}
 
 	return nil
+}
+func (store *Store) GetUrl(key string) string {
+	if key == "" {
+		return ""
+	}
+	col := store.bucket.DefaultCollection()
+
+	getResult, err := col.Get("u:"+key, nil)
+	if err != nil {
+		return ""
+	}
+
+	var result Shortened
+	err = getResult.Content(&result)
+
+	if err != nil {
+		return ""
+	}
+
+	if result.Type == "url" {
+		return result.Content
+
+	}
+	return ""
 }
 
 func (store *Store) GetStats(key string) int {
@@ -92,28 +118,4 @@ func (store *Store) UpdateHitCounter(key string) int {
 	}
 
 	return result.HitCounter
-}
-func (store *Store) GetUrl(key string) string {
-	if key == "" {
-		return ""
-	}
-	col := store.bucket.DefaultCollection()
-
-	getResult, err := col.Get("u:"+key, nil)
-	if err != nil {
-		return ""
-	}
-
-	var result Shortened
-	err = getResult.Content(&result)
-
-	if err != nil {
-		return ""
-	}
-
-	if result.Type == "url" {
-		return result.Content
-
-	}
-	return ""
 }

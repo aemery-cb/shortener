@@ -4,13 +4,14 @@ A thrown together all in one URL shortener.
 
 ## Todo
 - [ ] Streamline build.
-- [ ] Use a DB
 - [ ] CSV upload options
 - [ ] plain text sharing
-- [ ] URL Validation (server + clientside)
 - [ ] Change the api post request to a get request?
 
 ## Done
+- [x] Integrate users 
+- [x] Use a DB
+- [x] URL Validation (server + clientside)
 - [x] Embed the UI for an AIO binary
 - [x] Unique generation not SHA1 (Letter, Letter, NUM, Letter, Letter)
 ## Usage:
