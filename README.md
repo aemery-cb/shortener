@@ -3,6 +3,8 @@
 A thrown together all in one URL shortener.
 
 ## Todo
+- [ ] Update UI for users
+- [ ] Actually unique ID generation for URLs
 - [ ] Streamline build.
 - [ ] CSV upload options
 - [ ] plain text sharing
