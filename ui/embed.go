@@ -15,7 +15,6 @@ var EmbedUI = false
 
 // Get the subtree of the embedded files with `build` directory as a root.
 func BuildHTTPFS() http.FileSystem {
-
 	if EmbedUI {
 
 		build, err := fs.Sub(Public, "public")

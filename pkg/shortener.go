@@ -20,7 +20,6 @@ func Run() {
 		zlog, err = zap.NewDevelopment()
 	} else {
 		zlog, err = zap.NewProduction()
-
 	}
 
 	if err != nil {
@@ -46,7 +45,6 @@ func Run() {
 			Password: password,
 		},
 	})
-
 	if err != nil {
 		sugar.Fatal(err)
 	}

@@ -42,13 +42,13 @@ func (store *Store) StoreUrl(key, url, userId string) error {
 		Type:    "url",
 		Owner:   userId,
 	}, nil)
-
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
+
 func (store *Store) GetUrl(key string) string {
 	if key == "" {
 		return ""
@@ -69,7 +69,6 @@ func (store *Store) GetUrl(key string) string {
 
 	if result.Type == "url" {
 		return result.Content
-
 	}
 	return ""
 }

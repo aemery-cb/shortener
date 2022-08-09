@@ -23,7 +23,6 @@ type Server struct {
 }
 
 func NewServer(hostname string, store *store.Store, logger *zap.SugaredLogger) Server {
-
 	return Server{
 		hostname: hostname,
 		store:    store,
@@ -49,7 +48,6 @@ func (s *Server) Run(port string) error {
 		token := c.Locals("user")
 		if parsed, ok := token.(*jwt.Token); ok {
 			if mapClaims, moreOk := parsed.Claims.(jwt.MapClaims); moreOk {
-
 				c.Locals("user_id", mapClaims["sub"].(string))
 			}
 		}
@@ -76,8 +74,8 @@ func (s *Server) Run(port string) error {
 
 	return app.Listen(port)
 }
-func (s *Server) ShortenURL(c *fiber.Ctx) error {
 
+func (s *Server) ShortenURL(c *fiber.Ctx) error {
 	urlReq := &NewURLRequester{}
 
 	if err := c.BodyParser(urlReq); err != nil {
@@ -111,7 +109,6 @@ func (s *Server) ShortenURL(c *fiber.Ctx) error {
 
 	response := map[string]string{"url": final}
 	return c.JSON(response)
-
 }
 
 func (s *Server) GetURL(c *fiber.Ctx) error {
