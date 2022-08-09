@@ -42,6 +42,7 @@ func (s *Server) Run(port string) error {
 		Root: ui.BuildHTTPFS(),
 	}))
 
+	app.Use("/:code/stats", s.GetURLStats)
 	app.Use("/:code", s.GetURL)
 
 	successHandler := func(c *fiber.Ctx) error {
@@ -66,7 +67,6 @@ func (s *Server) Run(port string) error {
 		SuccessHandler: successHandler,
 	}))
 	app.Use("/api/shorten", s.ShortenURL)
-	app.Use("/:code/stats", s.GetURLStats)
 
 	app.Use("/", func(c *fiber.Ctx) error {
 		return fiber.ErrNotFound
